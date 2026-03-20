@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printos </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { DEFAULT: '#2D9ED8', dark: '#1e7eb0', light: '#f0f8fc', muted: '#8cbcd6' },
+                        dark: '#0f172a'
+                    },
+                    borderRadius: { '4xl': '2rem', '5xl': '3rem' }
+                }
+            }
+        }
+    </script>
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://elfsightcdn.com/platform.js" async></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #0f172a;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .path-draw {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2s ease-in-out forwards;
+        }
+
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .orbit-track {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px dashed #e2e8f0;
+            border-radius: 50%;
+        }
+
+        .orbit-anim {
+            animation: spin linear infinite;
+        }
+
+        .orbit-reverse {
+            animation: spin-reverse linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes spin-reverse {
+            100% {
+                transform: rotate(-360deg);
+            }
+        }
+
+        .img-reveal {
+            clip-path: inset(100% 0 0 0);
+        }
+
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+
+        .btn-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px -5px rgba(45, 158, 216, 0.4);
+        }
+
+        .mega-menu-panel {
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: scroll-left 40s linear infinite;
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        .material-symbols-rounded {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            line-height: 1;
+        }
+
+        .star-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .testimonial-swiper .swiper-pagination-bullet {
+            background: #cbd5e1;
+            opacity: 0.5;
+        }
+
+        .testimonial-swiper .swiper-pagination-bullet-active {
+            background: #2D9ED8;
+            opacity: 1;
+        }
+
+        .service-badge {
+            background: rgba(45, 158, 216, 0.08);
+            border: 1px solid rgba(45, 158, 216, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useLayoutEffect, useRef } = React;
+        gsap.registerPlugin(ScrollTrigger);
+
+        // ─── DATA ─────────────────────────────────────────────────────────────────
+        const MEGA_MENU_DATA = {
+            "Apparel": [{ title: "T-Shirts", links: ["Short Sleeve", "Long Sleeve", "V-Neck", "Performance"] }, { title: "Outerwear", links: ["Hoodies", "Jackets", "1/4 Zips", "Sweaters"] }, { title: "Headwear", links: ["Baseball Caps", "Beanies", "Visors"] }, { title: "Bags", links: ["Tote Bags", "Backpacks", "Duffels"] }],
+            "Photo Gifts": [{ title: "Wall Art", links: ["Canvas Prints", "Metal Prints", "Acrylic", "Wood Prints"] }, { title: "Books & Calendars", links: ["Photo Books", "Wall Calendars", "Desk Calendars"] }, { title: "Home Decor", links: ["Custom Blankets", "Pillows", "Coasters"] }],
+            "Stationery": [{ title: "Business Cards", links: ["Standard", "Premium", "Square", "Foil Accent"] }, { title: "Marketing", links: ["Flyers", "Postcards", "Brochures", "Rack Cards"] }, { title: "Office", links: ["Letterheads", "Envelopes", "Notepads", "Sticky Notes"] }],
+            "Packaging": [{ title: "Boxes", links: ["Mailer Boxes", "Product Boxes", "Shipping Boxes"] }, { title: "Labels & Stickers", links: ["Roll Labels", "Sheet Stickers", "Die-Cut Stickers"] }, { title: "Supplies", links: ["Custom Tape", "Tissue Paper", "Poly Mailers"] }],
+            "Signage": [{ title: "Banners", links: ["Vinyl Banners", "Retractable Banners", "Mesh Banners"] }, { title: "Signs", links: ["Yard Signs", "Aluminum Signs", "A-Frame Signs"] }, { title: "Decals", links: ["Window Decals", "Wall Decals", "Car Decals"] }],
+            "Corporate Gifts": [{ title: "Tech", links: ["Power Banks", "USB Drives", "Speakers", "Earbuds"] }, { title: "Office Accessories", links: ["Pens", "Notebooks", "Padfolios", "Mouse Pads"] }, { title: "Awards", links: ["Glass Awards", "Acrylic Awards", "Plaques"] }],
+            "Drinkware": [{ title: "Mugs", links: ["Ceramic Mugs", "Travel Mugs", "Campfire Mugs"] }, { title: "Bottles", links: ["Water Bottles", "Insulated Bottles", "Aluminium"] }, { title: "Tumblers", links: ["Stainless Steel", "Wine Tumblers", "Plastic Tumblers"] }]
+        };
+        const CATEGORY_NAMES = ["All Products", "Apparel", "Photo Gifts", "Stationery", "Packaging", "Signage", "Corporate Gifts", "Drinkware"];
+        MEGA_MENU_DATA["All Products"] = Object.keys(MEGA_MENU_DATA).map(k => ({ title: k, links: MEGA_MENU_DATA[k].map(s => s.title) }));
+
+        const BUSINESS_NEEDS = [
+            { id: 1, title: "Startups", desc: "Agile, cost-effective branding & essential prints.", image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=600&q=80" },
+            { id: 2, title: "Retail & E-commerce", desc: "Stunning packaging, tags, and promotional inserts.", image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80" },
+            { id: 3, title: "Events & Exhibitions", desc: "High-impact banners, lanyards, and standees.", image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80" },
+            { id: 4, title: "Corporate Offices", desc: "Professional stationery and official branding.", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        const POPULAR_CATEGORIES = [
+            { id: 1, title: "Apparel", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80" },
+            { id: 2, title: "Stationery", image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=800&q=80" },
+            { id: 3, title: "Packaging", image: "https://tse1.mm.bing.net/th/id/OIP.9fwp9I5SuEEiUUVpdC6g0wHaEY?rs=1&pid=ImgDetMain&o=7&rm=3" },
+            { id: 4, title: "Signage", image: "https://festoonsigns.com/wp-content/uploads/2023/06/Hospital-Signage.jpg" }
+        ];
+
+        const BEST_SELLERS = [
+            { id: 1, title: "Premium Cotton T-Shirt", image: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=400&q=80" },
+            { id: 2, title: "Matte Business Cards", image: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?auto=format&fit=crop&w=400&q=80" },
+            { id: 3, title: "Vinyl Banners", image: "https://images.unsplash.com/photo-1562564055-71e051d33c19?auto=format&fit=crop&w=400&q=80" },
+            { id: 4, title: "Ceramic Mugs", image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=400&q=80" },
+            { id: 5, title: "Die-Cut Stickers", image: "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?auto=format&fit=crop&w=400&q=80" },
+            { id: 6, title: "Custom Hoodies", image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=400&q=80" },
+            { id: 7, title: "Canvas Prints", image: "https://images.unsplash.com/photo-1579762593175-20226054cad0?auto=format&fit=crop&w=400&q=80" },
+            { id: 8, title: "Eco-Friendly Mailers", image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=400&q=80" }
+        ];
+
+        const NEW_LAUNCHES = [
+            { id: 1, title: "Eco-Friendly Mailers", image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=400&q=80" },
+            { id: 2, title: "Holographic Stickers", image: "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?auto=format&fit=crop&w=400&q=80" },
+            { id: 3, title: "Embroidered Caps", image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=400&q=80" },
+            { id: 4, title: "Metallic Business Cards", image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=400&q=80" },
+            { id: 5, title: "Custom Water Bottles", image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=400&q=80" }
+        ];
+
+        const TESTIMONIALS = [
+            { id: 1, name: "Sarah Jenkins", text: "The print quality is absolutely phenomenal. Our branded apparel came exactly as we envisioned.", img: "https://randomuser.me/api/portraits/women/44.jpg", stars: 5 },
+            { id: 2, name: "Michael Chang", text: "Fast turnaround and incredible customer service. The custom packaging elevated our product unboxing.", img: "https://randomuser.me/api/portraits/men/32.jpg", stars: 5 },
+            { id: 3, name: "Emma Thompson", text: "Beautiful business cards. The matte finish feels so premium and we constantly get compliments.", img: "https://randomuser.me/api/portraits/women/68.jpg", stars: 4 },
+            { id: 4, name: "David Miller", text: "Printos completely transformed our event signage. Crisp, vibrant, and delivered ahead of schedule.", img: "https://randomuser.me/api/portraits/men/46.jpg", stars: 5 }
+        ];
+
+        const FEATURES = [
+            { id: 1, title: "Fast Turn Around", desc: "Get your prints delivered when you need them.", icon: "bolt" },
+            { id: 2, title: "Easy Ordering", desc: "Seamless and hassle-free online checkout.", icon: "touch_app" },
+            { id: 3, title: "Nationwide Quality", desc: "Consistent, premium printing across the board.", icon: "verified" },
+            { id: 4, title: "Wide Product Range", desc: "Everything you need, all in one place.", icon: "category" }
+        ];
+
+        const CLIENTS = ["Bank Of Baroda", "SBI", "RBI", "Infosys", "TCS", "UST", "NIPM", "Asianet", "Asian College of Engineering", "Kerala Bank", "Shamy Catering", "Kairali", "Flavour Asia", "Mar Ivanious", "Jacob's Caterers"];
+
+        const HERO_CARDS = [
+            { id: 1, label: "Apparel", color: "#2D9ED8", bg: "#EBF8FF", image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80", desc: "T-Shirts, Hoodies, Caps & more" },
+            { id: 2, label: "Stationery", color: "#7C3AED", bg: "#F5F3FF", image: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=80", desc: "Business Cards, Flyers, Notepads" },
+            { id: 3, label: "Packaging", color: "#059669", bg: "#ECFDF5", image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=600&q=80", desc: "Boxes, Mailers, Labels & Stickers" },
+            { id: 4, label: "Signage", color: "#D97706", bg: "#FFFBEB", image: "https://images.unsplash.com/photo-1562564055-71e051d33c19?auto=format&fit=crop&w=600&q=80", desc: "Vinyl Banners, Standees, Boards" },
+            { id: 5, label: "Drinkware", color: "#DB2777", bg: "#FDF2F8", image: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=600&q=80", desc: "Mugs, Water Bottles, Tumblers" },
+            { id: 6, label: "Gifts", color: "#0891B2", bg: "#ECFEFF", image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80", desc: "Corporate & Personalised Gifts" },
+            { id: 7, label: "Photo", color: "#16A34A", bg: "#F0FDF4", image: "https://images.unsplash.com/photo-1579762593175-20226054cad0?auto=format&fit=crop&w=600&q=80", desc: "Canvas, Metal & Acrylic Prints" },
+        ];
+
+        // ─── LOGO COMPONENT ───────────────────────────────────────────────────────
+        const LOGO = ({ className = "w-9 h-9" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.26 150.6" className={className}>
+                <path fill="#2D9ED8" d="M122.26,61.13c0,33.76-27.37,61.13-61.13,61.13-7.42,0-14.54-1.32-21.12-3.75v-57.38c0-11.65,9.47-21.13,21.12-21.13s21.13,9.48,21.13,21.13-9.48,21.13-21.13,21.13c-4.53,0-8.73-1.43-12.17-3.88v22.04c3.85,1.2,7.93,1.84,12.17,1.84,22.68,0,41.13-18.45,41.13-41.13s-18.45-41.13-41.13-41.13S20.01,38.45,20.01,61.13v45.23C7.72,95.18,0,79.06,0,61.13,0,27.37,27.37,0,61.13,0s61.13,27.37,61.13,61.13Z" />
+                <polygon fill="#2D9ED8" points="20.01 106.36 40.01 118.51 40.01 150.6 20.01 150.6 20.01 106.36" />
+            </svg>
+        );
+
+        // ─── PRELOADER ────────────────────────────────────────────────────────────
+        function Preloader({ onComplete }) {
+            useEffect(() => {
+                const tl = gsap.timeline({ onComplete });
+                tl.to(".preloader-logo", { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" })
+                    .to(".preloader-tagline", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.3")
+                    .to(".preloader-logo", { scale: 1.1, opacity: 0, duration: 0.5, delay: 1.2, ease: "power2.in" })
+                    .to(".preloader-tagline", { opacity: 0, duration: 0.3 }, "<")
+                    .to(".preloader-bg", { yPercent: -100, duration: 1, ease: "power4.inOut" });
+            }, []);
+
+            return (
+                <div className="preloader-bg fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center gap-6">
+                    <div className="preloader-logo opacity-0 translate-y-8 flex items-center gap-8">
+                        <svg width="180" height="221" viewBox="0 0 122.26 150.6" fill="none">
+                            <path className="path-draw" d="M122.26,61.13c0,33.76-27.37,61.13-61.13,61.13-7.42,0-14.54-1.32-21.12-3.75v-57.38c0-11.65,9.47-21.13,21.12-21.13s21.13,9.48,21.13,21.13-9.48,21.13-21.13,21.13c-4.53,0-8.73-1.43-12.17-3.88v22.04c3.85,1.2,7.93,1.84,12.17,1.84,22.68,0,41.13-18.45,41.13-41.13s-18.45-41.13-41.13-41.13S20.01,38.45,20.01,61.13v45.23C7.72,95.18,0,79.06,0,61.13,0,27.37,27.37,0,61.13,0s61.13,27.37,61.13,61.13Z" stroke="#2D9ED8" strokeWidth="4" />
+                            <polygon className="path-draw" points="20.01 106.36 40.01 118.51 40.01 150.6 20.01 150.6 20.01 106.36" stroke="#2D9ED8" strokeWidth="4" />
+                        </svg>
+                        <span className="preloader-tagline text-7xl font-bold tracking-tighter text-dark opacity-0 translate-y-8">Printos</span>
+                    </div>
+                </div>
+            );
+        }
+
+        // ─── HEADER ─────────────────────────────────────────────────────────────────
+        function Header() {
+            const [menuOpen, setMenuOpen] = useState(false);
+            const [activeCategory, setActiveCategory] = useState('Apparel');
+            const tid = useRef(null);
+            const headerRef = useRef(null);
+
+            const openMenu = (cat = 'Apparel') => { clearTimeout(tid.current); setActiveCategory(cat); setMenuOpen(true); };
+            const closeMenu = () => { tid.current = setTimeout(() => setMenuOpen(false), 180); };
+            const keepOpen = () => clearTimeout(tid.current);
+            useEffect(() => () => clearTimeout(tid.current), []);
+
+            const CATEGORY_ICONS = {
+                'All Products': 'apps',
+                'Apparel': 'checkroom',
+                'Photo Gifts': 'photo_camera',
+                'Stationery': 'description',
+                'Packaging': 'inventory_2',
+                'Signage': 'campaign',
+                'Corporate Gifts': 'card_giftcard',
+                'Drinkware': 'local_cafe',
+            };
+
+            const navLinks = ['about', 'services', 'sustainability', 'features & benefits'];
+            const activeSections = MEGA_MENU_DATA[activeCategory] || [];
+
+            return (
+                <header ref={headerRef} className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+                    {/* ── Main bar ── */}
+                    <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                        {/* Logo */}
+                        <div className="flex items-center gap-3 cursor-pointer flex-shrink-0" onClick={() => setMenuOpen(false)}>
+                            <LOGO className="w-8 h-10" />
+                            <span className="text-xl font-bold tracking-tighter text-dark">Printos</span>
+                        </div>
+
+                        {/* Pill Nav */}
+                        <nav className="hidden lg:flex items-center gap-6 bg-gray-50/80 px-8 py-3 rounded-full border border-gray-100">
+                            {navLinks.map(item => (
+                                <a key={item} href={`#${item.split(' ')[0]}`}
+                                    className="text-sm font-medium text-gray-500 hover:text-dark transition-colors flex items-center gap-2"
+                                    onClick={() => setMenuOpen(false)}>
+                                    <span className="w-1.5 h-1.5 rounded-full border border-gray-300 flex-shrink-0"></span>
+                                    {item}
+                                </a>
+                            ))}
+                            {/* Products trigger — opens mega menu */}
+                            <button
+                                onMouseEnter={() => openMenu(activeCategory)}
+                                onMouseLeave={closeMenu}
+                                onClick={() => menuOpen ? setMenuOpen(false) : openMenu(activeCategory)}
+                                className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${menuOpen ? 'text-brand' : 'text-gray-500 hover:text-dark'
+                                    }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors ${menuOpen ? 'bg-brand border-brand' : 'border border-gray-300'
+                                    }`}></span>
+                                products
+                                <span className={`material-symbols-rounded text-base transition-transform duration-300 ${menuOpen ? 'rotate-180' : ''
+                                    }`}>expand_more</span>
+                            </button>
+                        </nav>
+
+                        {/* Right actions */}
+                        <div className="flex items-center gap-4">
+                            <button className="hidden md:flex items-center gap-2 text-gray-500 hover:text-dark transition-colors relative">
+                                <span className="material-symbols-rounded text-2xl">shopping_cart</span>
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand text-white text-[9px] font-bold rounded-full flex items-center justify-center">0</span>
+                            </button>
+                            <button className="hidden md:block text-gray-500 hover:text-dark transition-colors">
+                                <span className="material-symbols-rounded text-2xl">person</span>
+                            </button>
+                            <button className="bg-dark text-white px-6 py-2.5 rounded-full text-sm font-medium btn-hover whitespace-nowrap">
+                                Contact Us
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* ── Mega Menu Panel ── */}
+                    {menuOpen && (
+                        <div
+                            className="mega-menu-panel absolute left-0 right-0 w-full border-b border-gray-100 z-40"
+                            style={{ top: '100%', background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(24px)' }}
+                            onMouseEnter={keepOpen}
+                            onMouseLeave={closeMenu}
+                        >
+                            <div className="max-w-7xl mx-auto flex" style={{ minHeight: '420px' }}>
+
+                                {/* Left: Category sidebar */}
+                                <div className="flex-shrink-0 w-56 border-r border-gray-100 py-8 px-4 flex flex-col gap-1">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-3 mb-3">Browse By</p>
+                                    {CATEGORY_NAMES.map(cat => (
+                                        <button
+                                            key={cat}
+                                            onMouseEnter={() => setActiveCategory(cat)}
+                                            onClick={() => setActiveCategory(cat)}
+                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left ${activeCategory === cat
+                                                ? 'bg-brand/8 text-brand'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-dark'
+                                                }`}
+                                            style={activeCategory === cat ? { background: 'rgba(45,158,216,0.08)' } : {}}
+                                        >
+                                            <span className={`material-symbols-rounded text-xl flex-shrink-0 ${activeCategory === cat ? 'text-brand' : 'text-gray-400'
+                                                }`}>{CATEGORY_ICONS[cat]}</span>
+                                            <span>{cat}</span>
+                                            {activeCategory === cat && (
+                                                <span className="ml-auto material-symbols-rounded text-base text-brand">chevron_right</span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Right: Sub-columns */}
+                                <div className="flex-1 py-8 px-10">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-dark tracking-tight">{activeCategory}</h3>
+                                            <p className="text-xs text-gray-400 mt-0.5">Premium quality, fast turnaround</p>
+                                        </div>
+                                        <a href="#" className="flex items-center gap-1.5 text-brand text-sm font-semibold hover:gap-2.5 transition-all">
+                                            View all {activeCategory}
+                                            <span className="material-symbols-rounded text-base">arrow_forward</span>
+                                        </a>
+                                    </div>
+
+                                    <div className={`grid gap-8 ${activeSections.length <= 3 ? 'grid-cols-3' :
+                                        activeSections.length === 4 ? 'grid-cols-4' : 'grid-cols-4'
+                                        }`}>
+                                        {activeSections.map((col, i) => (
+                                            <div key={i} className="flex flex-col gap-3">
+                                                <h4 className="text-xs font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2">{col.title}</h4>
+                                                <ul className="space-y-2.5">
+                                                    {col.links.map((link, j) => (
+                                                        <li key={j}>
+                                                            <a href="#"
+                                                                className="text-sm text-gray-600 hover:text-brand transition-colors flex items-center gap-2 group">
+                                                                <span className="w-1 h-1 rounded-full bg-gray-300 group-hover:bg-brand transition-colors flex-shrink-0"></span>
+                                                                {link}
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+
+                                        {/* Promo card — hidden for All Products */}
+                                        {activeCategory !== 'All Products' && (
+                                            <div className="col-span-1 bg-gradient-to-br from-brand-light to-white rounded-2xl overflow-hidden relative border border-brand/10" style={{ minHeight: '200px' }}>
+                                                <img
+                                                    src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=400&q=80"
+                                                    alt="Promo"
+                                                    className="absolute inset-0 w-full h-full object-cover opacity-20"
+                                                />
+                                                <div className="relative z-10 p-6 h-full flex flex-col justify-between">
+                                                    <span className="bg-brand text-white text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-full w-fit">Special Offer</span>
+                                                    <div>
+                                                        <h5 className="font-bold text-dark text-base mb-1">20% Off {activeCategory}</h5>
+                                                        <p className="text-xs text-gray-500 mb-4">This week only — premium quality printing.</p>
+                                                        <a href="#" className="inline-flex items-center gap-1.5 text-brand text-sm font-bold hover:gap-2.5 transition-all">
+                                                            Shop Sale
+                                                            <span className="material-symbols-rounded text-base">arrow_right_alt</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Bottom quick-access bar */}
+                            <div className="border-t border-gray-100 bg-gray-50/60 px-10 py-3">
+                                <div className="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex-shrink-0 mr-2">Popular:</span>
+                                    {['Matte Business Cards', 'Custom Hoodies', 'Vinyl Banners', 'Die-Cut Stickers', 'Ceramic Mugs', 'Canvas Prints', 'Eco Mailers'].map(tag => (
+                                        <a key={tag} href="#"
+                                            className="flex-shrink-0 text-xs font-semibold text-gray-500 hover:text-brand bg-white border border-gray-200 hover:border-brand/40 px-3 py-1.5 rounded-full transition-all">
+                                            {tag}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </header>
+            );
+        }
+
+        // ─── STAMP CARD ───────────────────────────────────────────────────────────
+        function StampCard({ card, isActive, offset, onClick }) {
+            const absOff = Math.abs(offset);
+            const scale = isActive ? 1 : 1 - absOff * 0.10;
+            const rotateY = offset * 18;
+            const trans = offset * 155;
+            const zIndex = isActive ? 20 : 10 - absOff;
+            const opacity = isActive ? 1 : 1 - absOff * 0.25;
+
+            return (
+                <div
+                    onClick={onClick}
+                    style={{
+                        position: 'absolute',
+                        width: isActive ? 'clamp(260px, 26vw, 310px)' : 'clamp(220px, 22vw, 270px)',
+                        height: isActive ? 'clamp(340px, 36vw, 400px)' : 'clamp(290px, 30vw, 350px)',
+                        borderRadius: '28px',
+                        overflow: 'hidden',
+                        cursor: isActive ? 'default' : 'pointer',
+                        transform: `translateX(${trans}px) scale(${scale}) rotateY(${rotateY}deg)`,
+                        transformStyle: 'preserve-3d',
+                        transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                        zIndex,
+                        opacity,
+                        boxShadow: isActive
+                            ? `0 30px 70px -15px ${card.color}55, 0 0 0 1px ${card.color}22`
+                            : '0 10px 30px -10px rgba(0,0,0,0.15)',
+                        background: card.bg,
+                    }}
+                >
+                    {/* Image */}
+                    <img
+                        src={card.image}
+                        alt={card.label}
+                        style={{ width: '100%', height: '65%', objectFit: 'cover', display: 'block' }}
+                    />
+                    {/* Bottom info bar */}
+                    <div style={{
+                        padding: '18px 22px',
+                        display: 'flex', flexDirection: 'column', gap: '6px',
+                        background: card.bg,
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontWeight: 800, fontSize: '16px', color: '#0f172a', letterSpacing: '-0.3px' }}>{card.label}</span>
+                            <span style={{
+                                background: card.color, color: 'white',
+                                borderRadius: '999px', fontSize: '11px', fontWeight: 700,
+                                padding: '3px 10px', letterSpacing: '0.3px',
+                            }}>Shop →</span>
+                        </div>
+                        <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>{card.desc}</p>
+                    </div>
+                    {/* Active ring */}
+                    {isActive && (
+                        <div style={{
+                            position: 'absolute', inset: 0,
+                            borderRadius: '28px',
+                            border: `2.5px solid ${card.color}`,
+                            pointerEvents: 'none',
+                        }} />
+                    )}
+                </div>
+            );
+        }
+
+        // ─── HERO MASONRY ─────────────────────────────────────────────────────────
+        function HeroMasonry() {
+            const [activeIdx, setActiveIdx] = useState(3);
+            const autoRef = useRef(null);
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                if (!canvas || !window.THREE) return;
+                const T = window.THREE;
+                const W = canvas.offsetWidth || window.innerWidth;
+                const H = canvas.offsetHeight || window.innerHeight;
+                const scene = new T.Scene();
+                const camera = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+                const renderer = new T.WebGLRenderer({ canvas, alpha: true, antialias: false });
+                renderer.setSize(W, H);
+                renderer.setPixelRatio(1);
+                renderer.setClearColor(0x000000, 0);
+
+                const vertSrc = `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position, 1.0); }`;
+                const fragSrc = `
+                    precision highp float;
+                    uniform float u_time;
+                    uniform vec2  u_mouse;
+                    uniform vec2  u_res;
+                    varying vec2  vUv;
+                    void main() {
+                        float aspect = u_res.x / u_res.y;
+                        vec2 uv = vec2(vUv.x * aspect, vUv.y);
+                        float cols = 55.0;
+                        float cellSz = aspect / cols;
+                        vec2  cellUV = uv / cellSz;
+                        vec2  cellId = floor(cellUV);
+                        vec2  cell   = fract(cellUV) - 0.5;
+                        vec2 centre = (cellId + 0.5) * cellSz;
+                        vec2 mouseUV = vec2((u_mouse.x * 0.5 + 0.5) * aspect, u_mouse.y * 0.5 + 0.5);
+                        float dMouse = length(centre - mouseUV);
+                        float wave   = sin(dMouse * 38.0 - u_time * 4.2);
+                        float fade   = exp(-dMouse * 3.8);
+                        float ripple = wave * fade;
+                        float breath = sin(u_time * 0.55 + cellId.x * 0.18 + cellId.y * 0.22) * 0.5 + 0.5;
+                        float r = clamp(0.13 + breath * 0.04 + ripple * 0.13, 0.03, 0.30);
+                        float dist    = length(cell);
+                        float dotMask = 1.0 - smoothstep(r - 0.015, r + 0.015, dist);
+                        float ci = mod(cellId.x * 3.0 + cellId.y * 7.0, 4.0);
+                        vec3 tint;
+                        if      (ci < 1.0) tint = vec3(0.18, 0.62, 0.85);
+                        else if (ci < 2.0) tint = vec3(0.55, 0.36, 0.97);
+                        else if (ci < 3.0) tint = vec3(0.98, 0.45, 0.09);
+                        else               tint = vec3(0.06, 0.73, 0.51);
+                        float visibility = clamp(0.10 + breath * 0.04 + max(0.0, ripple) * fade * 0.35, 0.0, 0.55);
+                        vec3 bg    = vec3(0.965, 0.975, 0.990);
+                        vec3 color = mix(bg, tint * 0.55 + vec3(0.42), dotMask * visibility);
+                        gl_FragColor = vec4(color, 1.0);
+                    }
+                `;
+                const uniforms = {
+                    u_time: { value: 0.0 },
+                    u_mouse: { value: new T.Vector2(0.0, 0.0) },
+                    u_res: { value: new T.Vector2(W, H) },
+                };
+                const geo = new T.PlaneGeometry(2, 2);
+                const mat = new T.ShaderMaterial({ vertexShader: vertSrc, fragmentShader: fragSrc, uniforms, transparent: true, depthWrite: false });
+                scene.add(new T.Mesh(geo, mat));
+
+                const target = { x: 0, y: 0 };
+                const current = { x: 0, y: 0 };
+                const onMove = (e) => {
+                    const r = canvas.getBoundingClientRect();
+                    target.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+                    target.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+                };
+                window.addEventListener('mousemove', onMove);
+                let raf;
+                const clock = new T.Clock();
+                const animate = () => {
+                    raf = requestAnimationFrame(animate);
+                    current.x += (target.x - current.x) * 0.04;
+                    current.y += (target.y - current.y) * 0.04;
+                    uniforms.u_time.value = clock.getElapsedTime();
+                    uniforms.u_mouse.value.set(current.x, current.y);
+                    renderer.render(scene, camera);
+                };
+                animate();
+                const onResize = () => {
+                    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+                    uniforms.u_res.value.set(canvas.offsetWidth, canvas.offsetHeight);
+                };
+                window.addEventListener('resize', onResize);
+                return () => {
+                    cancelAnimationFrame(raf);
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('resize', onResize);
+                    renderer.dispose(); geo.dispose(); mat.dispose();
+                };
+            }, []);
+
+            const startAuto = () => {
+                clearInterval(autoRef.current);
+                autoRef.current = setInterval(() =>
+                    setActiveIdx(prev => (prev + 1) % HERO_CARDS.length), 3000);
+            };
+            useEffect(() => { startAuto(); return () => clearInterval(autoRef.current); }, []);
+
+            const handleCardClick = (idx) => { setActiveIdx(idx); startAuto(); };
+
+            const dragStart = useRef(null);
+            const handleDragStart = (e) => { dragStart.current = e.clientX ?? e.touches?.[0]?.clientX; };
+            const handleDragEnd = (e) => {
+                const end = e.clientX ?? e.changedTouches?.[0]?.clientX;
+                if (dragStart.current === null || end === undefined) return;
+                const diff = end - dragStart.current;
+                if (Math.abs(diff) > 40) {
+                    setActiveIdx(prev => diff < 0
+                        ? (prev + 1) % HERO_CARDS.length
+                        : (prev - 1 + HERO_CARDS.length) % HERO_CARDS.length);
+                    startAuto();
+                }
+                dragStart.current = null;
+            };
+
+            const visibleCards = HERO_CARDS.map((card, i) => {
+                const wrap = HERO_CARDS.length;
+                let norm = ((i - activeIdx + Math.floor(wrap / 2)) % wrap + wrap) % wrap - Math.floor(wrap / 2);
+                return { card, i, offset: norm };
+            }).filter(({ offset }) => Math.abs(offset) <= 2);
+
+            return (
+                <section id="about"
+                    className="relative w-full flex flex-col items-center overflow-hidden z-0"
+                    style={{ minHeight: '100vh', background: 'linear-gradient(160deg,#f0f8ff 0%,#fafafa 50%,#fff8f0 100%)', paddingTop: '120px' }}
+                >
+                    {/* Three.js canvas */}
+                    <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none', display: 'block' }} />
+                    {/* Ambient blobs */}
+                    <div style={{ position: 'absolute', top: '5%', left: '8%', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle,rgba(45,158,216,0.10) 0%,transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+                    <div style={{ position: 'absolute', top: '15%', right: '6%', width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle,rgba(139,92,246,0.09) 0%,transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
+                    <div style={{ position: 'absolute', bottom: '10%', left: '15%', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle,rgba(245,158,11,0.08) 0%,transparent 70%)', filter: 'blur(35px)', pointerEvents: 'none' }} />
+
+                    {/* Hero text */}
+                    <div className="text-center px-6" style={{ position: 'relative', zIndex: 10 }}>
+                        <h1 style={{ fontSize: 'clamp(2.4rem,6vw,4.8rem)', fontWeight: 700, lineHeight: 1.08, letterSpacing: '-1.5px', color: '#0f172a', margin: 0 }}>
+                            Elevate Yourself With<br />
+                            <span style={{ color: '#2D9ED8' }}>Printos</span>
+                        </h1>
+                    </div>
+
+                    {/* Card Carousel */}
+                    <div
+                        style={{ position: 'relative', width: '100%', height: 'clamp(370px,40vw,430px)', marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', userSelect: 'none' }}
+                        onMouseDown={handleDragStart} onMouseUp={handleDragEnd}
+                        onTouchStart={handleDragStart} onTouchEnd={handleDragEnd}
+                    >
+                        {visibleCards.map(({ card, i, offset }) => (
+                            <StampCard key={card.id} card={card} isActive={i === activeIdx} offset={offset} onClick={() => handleCardClick(i)} />
+                        ))}
+                    </div>
+
+                    {/* Dot indicators */}
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '18px', position: 'relative', zIndex: 10 }}>
+                        {HERO_CARDS.map((c, i) => (
+                            <button key={c.id} onClick={() => handleCardClick(i)} aria-label={`Go to ${c.label}`}
+                                style={{ width: i === activeIdx ? '28px' : '8px', height: '8px', borderRadius: '999px', background: i === activeIdx ? (HERO_CARDS[activeIdx]?.color || '#2D9ED8') : '#cbd5e1', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}
+                            />
+                        ))}
+                    </div>
+
+                    {/* CTA */}
+                    <div style={{ marginTop: '22px', position: 'relative', zIndex: 10 }}>
+                        <a href="#"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: HERO_CARDS[activeIdx]?.color || '#2D9ED8', color: 'white', fontWeight: 700, fontSize: '15px', padding: '13px 32px', borderRadius: '999px', boxShadow: `0 12px 30px -8px ${HERO_CARDS[activeIdx]?.color || '#2D9ED8'}66`, textDecoration: 'none', transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)', letterSpacing: '-0.2px' }}
+                            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.04)'; }}
+                            onMouseOut={e => { e.currentTarget.style.transform = 'none'; }}
+                        >
+                            Shop {HERO_CARDS[activeIdx]?.label}
+                            <span className="material-symbols-rounded" style={{ fontSize: '20px' }}>arrow_forward</span>
+                        </a>
+                    </div>
+
+                    {/* Spacer so sections below aren't covered */}
+                    <div style={{ height: '40px' }} />
+                </section>
+            );
+        }
+
+        // ─── STATEMENT ────────────────────────────────────────────────────────────
+        function Statement() {
+            useLayoutEffect(() => {
+                gsap.fromTo(".statement-text", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.2, scrollTrigger: { trigger: ".statement-section", start: "top 70%" } });
+            }, []);
+            return (
+                <section className="statement-section py-32 bg-brand-light/40 px-6">
+                    <div className="max-w-5xl mx-auto text-center">
+                        <h2 className="statement-text text-4xl md:text-6xl font-medium tracking-tight text-dark leading-tight">
+                            evolutionary printing solutions that are <span className="text-brand">faster</span>,  more <span className="text-brand">efficient</span> & <span className="text-brand">sustainable</span>.
+                        </h2>
+                    </div>
+                </section>
+            );
+        }
+
+        // ─── CLIENTS MARQUEE ──────────────────────────────────────────────────────
+        function ClientMarquee() {
+            const items = [...CLIENTS, ...CLIENTS];
+            return (
+                <section className="py-12 bg-white border-y border-gray-100 overflow-hidden relative">
+                    <div className="max-w-7xl mx-auto px-6 mb-6 text-center">
+                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Trusted by industry leaders</h3>
+                    </div>
+                    <div className="relative">
+                        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+                        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+                        <div className="relative flex overflow-hidden">
+                            <div className="marquee-track items-center">
+                                {items.map((client, idx) => (
+                                    <div key={idx} className="flex-shrink-0 px-10">
+                                        <span className="text-2xl font-black text-gray-200 uppercase tracking-tighter hover:text-brand transition-colors cursor-default whitespace-nowrap">{client}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // ─── SERVICES (Business Needs) ────────────────────────────────────────────
+        function Services() {
+            useLayoutEffect(() => {
+                gsap.fromTo(".service-card", { opacity: 0, scale: 0.92, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.8, stagger: 0.12, scrollTrigger: { trigger: "#services", start: "top 70%" } });
+            }, []);
+
+            return (
+                <section id="services" className="py-32 px-6 max-w-7xl mx-auto">
+                    <div className="flex justify-between items-end mb-16">
+                        <div>
+                            <span className="text-brand font-bold tracking-widest uppercase text-xs mb-3 block">Solutions</span>
+                            <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-dark">What we offer</h2>
+                        </div>
+                        <p className="text-gray-500 max-w-sm text-sm hidden md:block leading-relaxed">
+                            We revolutionize printing by offering premium capabilities, sustainable materials, and a seamless ordering experience.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {BUSINESS_NEEDS.map((item) => (
+                            <div key={item.id} className="service-card group cursor-pointer">
+                                <div className="h-64 rounded-3xl overflow-hidden mb-6 relative">
+                                    <img src={item.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={item.title} />
+                                    <div className="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="material-symbols-rounded text-dark text-lg">arrow_outward</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="material-symbols-rounded text-brand text-xl">check_circle</span>
+                                    <h3 className="text-lg font-semibold text-dark">{item.title}</h3>
+                                </div>
+                                <p className="text-sm text-gray-500 pl-9 leading-relaxed">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            );
+        }
+
+        // ─── BENTO GRID (Popular Categories + Features) ───────────────────────────
+        function BentoGrid() {
+            useLayoutEffect(() => {
+                gsap.fromTo(".bento-item", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, scrollTrigger: { trigger: ".bento-section", start: "top 75%" } });
+            }, []);
+
+            return (
+                <section id="features" className="bento-section py-20 px-6 max-w-7xl mx-auto">
+                    <div className="mb-12">
+                        <span className="text-brand font-bold tracking-widest uppercase text-xs mb-3 block">Explore</span>
+                        <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-dark">Popular Categories</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 h-auto md:h-[600px]">
+                        {/* Large image */}
+                        <div className="bento-item md:col-span-2 md:row-span-2 rounded-4xl overflow-hidden relative group cursor-pointer">
+                            <img src={POPULAR_CATEGORIES[0].image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Apparel" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent flex flex-col justify-end p-8">
+                                <span className="text-white/70 text-xs font-bold uppercase tracking-widest mb-2">Most Popular</span>
+                                <h3 className="text-white text-3xl font-semibold mb-2">{POPULAR_CATEGORIES[0].title}</h3>
+                                <div className="flex items-center gap-2 text-white/80 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Shop Now <span className="material-symbols-rounded text-base">arrow_forward</span>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Stat box */}
+                        <div className="bento-item bg-brand-light rounded-4xl p-8 flex flex-col justify-center items-center text-center">
+                            <span className="material-symbols-rounded text-brand text-4xl mb-4">group</span>
+                            <h4 className="text-5xl font-medium text-dark tracking-tighter mb-2">5000+</h4>
+                            <p className="text-gray-500 text-sm">Happy clients nationwide</p>
+                        </div>
+                        {/* Dark feature box */}
+                        <div className="bento-item bg-dark rounded-4xl p-8 flex flex-col justify-between">
+                            <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white">
+                                <span className="material-symbols-rounded">bolt</span>
+                            </div>
+                            <div>
+                                <h4 className="text-white text-2xl font-medium mb-2">48hr Delivery</h4>
+                                <p className="text-white/60 text-sm">Nationwide shipping, always on time.</p>
+                            </div>
+                        </div>
+                        {/* Stationery image */}
+                        <div className="bento-item rounded-4xl overflow-hidden relative group cursor-pointer">
+                            <img src={POPULAR_CATEGORIES[1].image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Stationery" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-dark/60 to-transparent flex items-end p-6">
+                                <h4 className="text-white font-semibold">{POPULAR_CATEGORIES[1].title}</h4>
+                            </div>
+                        </div>
+                        {/* CTA box */}
+                        <div className="bento-item bg-gray-50 border border-gray-100 rounded-4xl p-8 flex flex-col justify-center">
+                            <h4 className="text-2xl font-medium text-dark mb-4">Your Brand, Elevated.</h4>
+                            <div className="flex items-center gap-2 text-brand font-medium cursor-pointer group">
+                                Explore catalog <span className="material-symbols-rounded group-hover:translate-x-1 transition-transform text-lg">arrow_forward</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // ─── NEW LAUNCHES ─────────────────────────────────────────────────────────
+        function NewLaunches() {
+            useLayoutEffect(() => {
+                gsap.fromTo(".launch-card", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.1, scrollTrigger: { trigger: ".launches-section", start: "top 75%" } });
+            }, []);
+
+            return (
+                <section className="launches-section py-24 px-6 max-w-7xl mx-auto">
+                    <div className="flex justify-between items-end mb-12">
+                        <div>
+                            <span className="text-brand font-bold tracking-widest uppercase text-xs mb-3 block">Just Dropped</span>
+                            <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-dark">New Launches</h2>
+                        </div>
+                        <button className="text-brand font-semibold text-sm flex items-center gap-1 hover:gap-3 transition-all">
+                            View All <span className="material-symbols-rounded text-lg">arrow_forward</span>
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {NEW_LAUNCHES.map((item, i) => (
+                            <div key={item.id} className="launch-card group flex items-center gap-5 p-5 bg-gray-50 rounded-3xl border border-gray-100 hover:border-brand/30 hover:shadow-lg transition-all duration-500 cursor-pointer" style={{ transitionDelay: `${i * 50}ms` }}>
+                                <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
+                                    <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title} />
+                                </div>
+                                <div className="flex-1">
+                                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand block mb-1">New Arrival</span>
+                                    <h4 className="font-semibold text-dark group-hover:text-brand transition-colors text-lg leading-snug">{item.title}</h4>
+                                </div>
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity text-brand">
+                                    <span className="material-symbols-rounded">arrow_forward</span>
+                                </div>
+                            </div>
+                        ))}
+                        {/* Promo card */}
+                        <div className="launch-card group bg-brand rounded-3xl p-8 flex flex-col justify-center relative overflow-hidden cursor-pointer text-white col-span-1 md:col-span-2 lg:col-span-1">
+                            <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/20 rounded-full blur-2xl group-hover:bg-white/30 transition-all"></div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full w-fit mb-4">Limited Time</span>
+                            <h4 className="text-3xl font-bold mb-3">Summer Sale!</h4>
+                            <p className="text-white/80 mb-6 font-medium">Up to 30% off on all new arrivals this week.</p>
+                            <button className="bg-white text-brand font-bold py-2.5 px-6 rounded-full w-fit text-sm hover:scale-105 transition-transform">Shop Collection</button>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // ─── BEST SELLERS ─────────────────────────────────────────────────────────
+        function BestSellers() {
+            const swiperRef = useRef(null);
+            const chunked = [];
+            for (let i = 0; i < BEST_SELLERS.length; i += 4) chunked.push(BEST_SELLERS.slice(i, i + 4));
+
+            useEffect(() => {
+                swiperRef.current = new Swiper('.bestseller-swiper', { slidesPerView: 1, spaceBetween: 40, loop: true, speed: 800, autoplay: { delay: 5000, disableOnInteraction: false }, navigation: { nextEl: '.bs-next', prevEl: '.bs-prev' } });
+                return () => { if (swiperRef.current?.destroy) swiperRef.current.destroy(true, true); };
+            }, []);
+
+            return (
+                <section className="py-24 px-6 bg-gray-50">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-12">
+                            <span className="text-brand font-bold tracking-widest uppercase text-xs mb-3 block">Top Picks</span>
+                            <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-dark">Best Sellers</h2>
+                            <p className="text-gray-500 mt-4 font-medium max-w-xl mx-auto">Our most loved and highest-rated prints, curated for your success.</p>
+                        </div>
+                        <div className="relative max-w-5xl mx-auto group/slider">
+                            <button className="bs-prev absolute left-0 top-1/2 -translate-y-1/2 -translate-x-8 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center z-20 text-dark hover:text-brand transition-colors">
+                                <span className="material-symbols-rounded">chevron_left</span>
+                            </button>
+                            <button className="bs-next absolute right-0 top-1/2 -translate-y-1/2 translate-x-8 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center z-20 text-dark hover:text-brand transition-colors">
+                                <span className="material-symbols-rounded">chevron_right</span>
+                            </button>
+                            <div className="swiper bestseller-swiper">
+                                <div className="swiper-wrapper">
+                                    {chunked.map((chunk, si) => (
+                                        <div key={si} className="swiper-slide">
+                                            <div className="grid grid-cols-2 grid-rows-3 gap-4 h-[600px]">
+                                                {chunk.map((item, idx) => {
+                                                    let cls = "";
+                                                    if (idx === 0) cls = "col-start-1 row-start-1 row-span-2";
+                                                    if (idx === 1) cls = "col-start-1 row-start-3 row-span-1";
+                                                    if (idx === 2) cls = "col-start-2 row-start-1 row-span-1";
+                                                    if (idx === 3) cls = "col-start-2 row-start-2 row-span-2";
+                                                    return (
+                                                        <div key={item.id} className={`${cls} relative group rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500`}>
+                                                            <img src={item.image} alt={item.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
+                                                            <div className="absolute bottom-0 left-0 right-0 p-5">
+                                                                <h3 className="text-white font-semibold text-lg drop-shadow-md transform translate-y-2 group-hover:translate-y-0 transition-transform">{item.title}</h3>
+                                                                <div className="h-0 overflow-hidden opacity-0 group-hover:h-auto group-hover:opacity-100 group-hover:mt-3 transition-all flex gap-3">
+                                                                    <button className="bg-white text-dark text-xs font-bold px-5 py-2 rounded-full hover:bg-brand hover:text-white transition-colors">Shop Now</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // ─── WHY CHOOSE US ────────────────────────────────────────────────────────
+        const WHY_CHOOSE_US = [
+            { id: "01", title: "Fast Turn Around", desc: "Get your prints delivered when you need them.", icon: "bolt", color: "#22C55E", bg: "#f0fff4" },
+            { id: "02", title: "Easy Ordering",     desc: "Seamless and hassle-free online checkout.",   icon: "touch_app", color: "#F97316", bg: "#fff7ed" },
+            { id: "03", title: "Nationwide Quality", desc: "Consistent, premium printing across the board.", icon: "verified", color: "#3B82F6", bg: "#eff6ff" },
+            { id: "04", title: "Wide Product Range", desc: "Everything you need, all in one place.",        icon: "category", color: "#EC4899", bg: "#fdf2f8" }
+        ];
+
+        function WhyChooseUs() {
+            useLayoutEffect(() => {
+                gsap.fromTo(".pin-card", 
+                    { y: 60, opacity: 0, rotate: -2 }, 
+                    { y: 0, opacity: 1, rotate: 0, duration: 1, stagger: 0.15, ease: "power3.out", scrollTrigger: { trigger: "#why-choose-us", start: "top 75%" } }
+                );
+            }, []);
+
+            return (
+                <section id="why-choose-us" className="py-32 bg-gray-50/50 px-6 relative overflow-hidden">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-20">
+                            <span className="text-brand font-bold tracking-widest uppercase text-xs mb-3 block">Our Values</span>
+                            <h2 className="text-4xl md:text-6xl font-medium tracking-tighter text-dark">Why Choose Us?</h2>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {WHY_CHOOSE_US.map((item) => (
+                                <div key={item.id} className="pin-card group relative bg-white rounded-[2rem] p-10 pt-14 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                                    {/* Push Pin */}
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full shadow-lg z-20" 
+                                         style={{ 
+                                             background: `radial-gradient(circle at 30% 30%, ${item.color}, #000 150%)`,
+                                             boxShadow: `0 4px 10px ${item.color}44`
+                                         }}>
+                                        <div className="absolute top-1 left-1.5 w-2 h-2 bg-white/30 rounded-full blur-[1px]"></div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex justify-between items-start mb-6">
+                                        <span className="text-4xl font-black italic opacity-20" style={{ color: item.color }}>{item.id}</span>
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: item.bg, color: item.color }}>
+                                            <span className="material-symbols-rounded text-2xl">{item.icon}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <h4 className="text-xl font-bold text-dark mb-3 leading-tight">{item.title}</h4>
+                                    <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+                                    
+                                    {/* Bottom Accent */}
+                                    <div className="absolute bottom-0 left-0 right-0 h-1.5 rounded-b-[2rem] opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: item.color }}></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // ─── ORBIT TESTIMONIALS ───────────────────────────────────────────────────
+        // ─── TESTIMONIALS (Elfsight Google Reviews) ─────────────────────────────────────────
+        function OrbitTestimonials() {
+            return (
+                <section className="py-24 px-6 bg-white">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="text-center mb-12">
+                            <span className="text-brand font-bold tracking-widest uppercase text-xs mb-3 block">Testimonials</span>
+                            <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-dark">
+                                What Our Clients Say
+                            </h2>
+                        </div>
+                        <div className="elfsight-app-35f7b210-eb05-46ae-8f32-2c80de3bd8ba" data-elfsight-app-lazy></div>
+                    </div>
+                </section>
+            );
+        }
+
+
+        // ─── FOOTER ───────────────────────────────────────────────────────────────
+        function Footer() {
+            return (
+                <footer className="relative py-32 bg-gray-50 overflow-hidden flex flex-col items-center justify-center text-center px-6">
+                    <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(#2D9ED8 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
+                    <div className="relative z-10 mb-20">
+                        <div className="flex items-center justify-center gap-3 mb-10">
+                            <LOGO className="w-12 h-14" />
+                            <span className="text-4xl font-bold tracking-tighter text-dark">Printos</span>
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-medium tracking-tighter text-dark mb-6">Let's Create Together</h2>
+                        <a href="mailto:printostvm@gmail.com" className="text-2xl md:text-4xl font-light text-gray-400 hover:text-brand transition-colors">printostvm@gmail.com</a>
+                    </div>
+                    {/* Map */}
+                    <div className="relative z-10 w-full max-w-3xl mx-auto mb-16">
+                        <div className="w-full h-[200px] rounded-4xl overflow-hidden border border-gray-200 shadow-sm">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945.989774549804!2d76.9489795!3d8.5003727!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b05bbd52d5d2d5d%3A0xc013d20635c5acab!2sPrintos%20tvm!5e0!3m2!1sen!2sae!4v1773801936162!5m2!1sen!2sae" width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy"></iframe>
+                        </div>
+                    </div>
+                    <div className="relative z-10 w-full max-w-7xl flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-gray-400 font-medium border-t border-gray-200 pt-8">
+                        <span>© 2026 Printos. All rights reserved.</span>
+                        <div className="flex gap-8">
+                            <a href="#" className="hover:text-dark transition-colors">Instagram</a>
+                            <a href="#" className="hover:text-dark transition-colors">LinkedIn</a>
+                            <a href="#" className="hover:text-dark transition-colors">WhatsApp</a>
+                        </div>
+                    </div>
+                </footer>
+            );
+        }
+
+        // ─── APP ──────────────────────────────────────────────────────────────────
+        function App() {
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                if (!loading) {
+                    window.scrollTo(0, 0);
+                    setTimeout(() => ScrollTrigger.refresh(), 300);
+                }
+            }, [loading]);
+
+            return (
+                <div className="w-full">
+                    {loading && <Preloader onComplete={() => setLoading(false)} />}
+                    <div className={loading ? "h-screen overflow-hidden" : ""}>
+                        <Header />
+                        <main>
+                            <HeroMasonry />
+                            <Statement />
+                            <ClientMarquee />
+                            <Services />
+                            <BentoGrid />
+                            <NewLaunches />
+                            <BestSellers />
+                            <OrbitTestimonials />
+                            <WhyChooseUs />
+                        </main>
+                        <Footer />
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+
+</html>
